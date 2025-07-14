@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>تتبع السائق</title>
+</head>
+<body>
+  <h2>نموذج تتبع السائق</h2>
+  <form>
+    <input type="text" id="name" placeholder="اسم السائق" required><br>
+    <input type="text" id="plate" placeholder="رقم اللوحة" required><br>
+    <input type="text" id="project" placeholder="اسم المشروع" required><br>
+    <button type="button" onclick="startTracking()">ابدأ التتبع</button>
+  </form>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB2i-Bw6V-4DCpzdEMetj1ruqGPJ6Ludwk",
+      authDomain: "dddd-6d2b7.firebaseapp.com",
+      databaseURL: "https://dddd-6d2b7-default-rtdb.firebaseio.com",
+      projectId: "dddd-6d2b7",
+      storageBucket: "dddd-6d2b7.firebasestorage.app",
+      messagingSenderId: "470385998919",
+      appId: "1:470385998919:web:8412232af0f70f991d8562"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    function startTracking() {
+      const name = document.getElementById('name').value;
+      const plate = document.getElementById('plate').value;
+      const project = document.getElementById('project').value;
+
+      if (!name || !plate || !project) {
+        alert("يرجى تعبئة جميع الحقول");
+        return;
+      }
+
+      navigator.geolocation.watchPosition((position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const time = new Date().toISOString();
+
+        const data = {
+          name,
+          plate,
+          project,
+          lat,
+          lng,
+          time
+        };
+
+        set(ref(database, 'drivers/' + plate), data);
+      }, (error) => {
+        alert("فشل في تحديد الموقع: " + error.message);
+      }, {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 5000
+      });
+    }
+  </script>
+</body>
+</html>
